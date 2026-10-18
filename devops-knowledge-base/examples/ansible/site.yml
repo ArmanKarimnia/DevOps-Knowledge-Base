@@ -1,0 +1,62 @@
+---
+# Enterprise Linux Production Node Baseline Playbook
+# Target: Ubuntu 22.04 / 24.04 LTS & RHEL 9
+
+- name: Apply Baseline System Hardening & Dependencies
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    required_packages:
+      - curl
+      - jq
+      - htop
+      - iotop
+      - tcpdump
+      - net-tools
+      - wireguard-tools
+      - chrony
+      - ufw
+
+  tasks:
+    - name: Update apt cache and upgrade packages
+      when: ansible_os_family == "Debian"
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        upgrade: dist
+
+    - name: Install essential operational packages
+      ansible.builtin.package:
+        name: "{{ required_packages }}"
+        state: present
+
+    - name: Configure kernel parameters for Kubernetes & Cilium eBPF
+      ansible.posix.sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: true
+        sysctl_file: /etc/sysctl.d/99-kubernetes-cilium.conf
+      loop:
+        - { key: "net.ipv4.ip_forward", value: "1" }
+        - { key: "net.bridge.bridge-nf-call-iptables", value: "1" }
+        - { key: "net.bridge.bridge-nf-call-ip6tables", value: "1" }
+        - { key: "fs.inotify.max_user_watches", value: "524288" }
+        - { key: "fs.inotify.max_user_instances", value: "8192" }
+        - { key: "vm.max_map_count", value: "262144" }
+
+    - name: Ensure required kernel modules are loaded
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - overlay
+        - br_netfilter
+
+    - name: Ensure Chrony NTP synchronization service is enabled and started
+      ansible.builtin.systemd:
+        name: chrony
+        state: started
+        enabled: true

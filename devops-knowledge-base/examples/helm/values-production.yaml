@@ -1,0 +1,91 @@
+# Production Helm Values Example
+# Standardized values schema for cloud-native microservice deployments
+
+replicaCount: 3
+
+image:
+  repository: registry.example.com/platform/order-service
+  pullPolicy: IfNotPresent
+  tag: "1.4.2"
+
+imagePullSecrets:
+  - name: nexus-registry-secret
+
+nameOverride: ""
+fullnameOverride: "order-service"
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "order-service-sa"
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: "apisix"
+  annotations:
+    k8s.apisix.apache.org/enable-cors: "true"
+    k8s.apisix.apache.org/rate-limit: "100"
+  hosts:
+    - host: api.example.com
+      paths:
+        - path: /api/v1/orders
+          pathType: Prefix
+  tls:
+    - secretName: api-example-tls
+      hosts:
+        - api.example.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector:
+  node-role.kubernetes.io/worker: "true"
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: order-service
+          topologyKey: kubernetes.io/hostname

@@ -1,0 +1,35 @@
+# MkDocs build artifacts
+site/
+__pycache__/
+*.py[cod]
+.venv/
+env/
+venv/
+ENV/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files & logs
+*.log
+.tmp/
+tmp/
+
+# Node & package artifacts (if tooling used)
+node_modules/
+package-lock.json
+
+# Local environment overrides
+.env
+.env.local
+*.secret
+*.key
+*.pem
+*.pfx
+kubeconfig*

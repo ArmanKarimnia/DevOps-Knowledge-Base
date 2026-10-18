@@ -1,0 +1,6 @@
+{
+  "name": "DevOps Knowledge Base & Operations Handbook",
+  "description": "Production-grade DevOps Knowledge Base, Kubernetes & RKE2 engineering guides, GitLab CI/CD pipelines, Cilium, APISIX, Linux administration cheat sheets, and operational runbooks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

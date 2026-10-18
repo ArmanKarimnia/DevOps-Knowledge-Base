@@ -1,0 +1,184 @@
+site_name: DevOps Knowledge Base & Operations Handbook
+site_description: Production-tested knowledge base, cheatsheets, runbooks, and architectures for Kubernetes, RKE2, Cilium, APISIX, GitLab CI, Nexus, Linux, and Observability.
+site_author: DevOps Engineer
+site_url: https://yourusername.github.io/devops-knowledge-base/
+repo_name: devops-knowledge-base
+repo_url: https://github.com/yourusername/devops-knowledge-base
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Learning Roadmap: learning-roadmap.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - DevOps Lifecycle: architecture/devops-lifecycle.md
+      - Release Management: architecture/release-management.md
+  - Linux & SysAdmin:
+      - Overview: linux/index.md
+      - Commands Cheatsheet: linux/commands-cheatsheet.md
+      - Networking: linux/networking.md
+      - Systemd: linux/systemd.md
+      - Storage & Filesystems: linux/storage-and-filesystems.md
+      - SSH & Access: linux/ssh-and-access.md
+      - Permissions & Processes: linux/permissions-and-processes.md
+      - Troubleshooting: linux/troubleshooting.md
+  - Git & Version Control:
+      - Overview: git/index.md
+      - Commands Cheatsheet: git/commands-cheatsheet.md
+      - Branching Strategies: git/branching-strategies.md
+      - Troubleshooting: git/troubleshooting.md
+  - Containers & Docker:
+      - Overview: docker/index.md
+      - Commands Cheatsheet: docker/commands-cheatsheet.md
+      - Docker Compose: docker/docker-compose.md
+      - Networking: docker/networking.md
+      - Image Management: docker/image-management.md
+      - Troubleshooting: docker/troubleshooting.md
+  - Kubernetes & RKE2:
+      - Overview: kubernetes/index.md
+      - Architecture: kubernetes/architecture.md
+      - Kubectl Cheatsheet: kubernetes/kubectl-cheatsheet.md
+      - Workloads & Services: kubernetes/workloads-and-services.md
+      - Config & Secrets: kubernetes/configuration-and-secrets.md
+      - RBAC & Security: kubernetes/rbac.md
+      - Networking & Cilium: kubernetes/cilium.md
+      - Cluster Networking: kubernetes/networking.md
+      - Storage: kubernetes/storage.md
+      - Helm: kubernetes/helm.md
+      - RKE2 Operations: kubernetes/rke2.md
+      - Upgrades & Maintenance: kubernetes/upgrades-and-maintenance.md
+      - Troubleshooting: kubernetes/troubleshooting.md
+  - API Gateway (APISIX):
+      - Overview: apisix/index.md
+      - Architecture: apisix/architecture.md
+      - Routes, Services & Upstreams: apisix/routes-services-upstreams.md
+      - Plugins & Auth: apisix/plugins-and-authentication.md
+      - TLS & Security: apisix/tls-and-security.md
+      - Troubleshooting: apisix/troubleshooting.md
+  - CI/CD (GitLab):
+      - Overview: cicd/index.md
+      - GitLab CI Fundamentals: cicd/gitlab-ci-fundamentals.md
+      - Pipeline Examples: cicd/pipeline-examples.md
+      - Runners & Artifacts: cicd/runners-and-artifacts.md
+      - Deployment Strategies: cicd/deployment-strategies.md
+      - Rollback & Release Management: cicd/rollback-and-release-management.md
+  - Artifacts (Nexus):
+      - Overview: nexus/index.md
+      - Repository Types: nexus/repository-types.md
+      - Docker Registries: nexus/docker-registries.md
+      - Package Proxying: nexus/package-proxying.md
+      - Troubleshooting: nexus/troubleshooting.md
+  - Ansible & Automation:
+      - Ansible Overview: ansible/index.md
+      - Ansible Cheatsheet: ansible/commands-cheatsheet.md
+      - Inventory & Variables: ansible/inventory-and-variables.md
+      - Playbooks & Roles: ansible/playbooks-and-roles.md
+      - Ansible Troubleshooting: ansible/troubleshooting.md
+      - Bash Scripting: automation/bash.md
+      - YAML Standard: automation/yaml.md
+      - jq & JSON Processing: automation/jq-and-json.md
+  - Observability & Monitoring:
+      - Overview: observability/index.md
+      - Prometheus: observability/prometheus.md
+      - Grafana: observability/grafana.md
+      - ELK Stack: observability/elk-stack.md
+      - SLI, SLO & SLA: observability/sli-slo-sla.md
+      - Alerting & Troubleshooting: observability/alerting-and-troubleshooting.md
+  - Messaging (Kafka):
+      - Overview: kafka/index.md
+      - Commands Cheatsheet: kafka/commands-cheatsheet.md
+      - Kafka Connect: kafka/kafka-connect.md
+      - Consumer Groups & Offsets: kafka/consumer-groups-and-offsets.md
+      - Troubleshooting: kafka/troubleshooting.md
+  - Databases & Data:
+      - Overview: databases/index.md
+      - Oracle SQL Cheatsheet: databases/oracle-sql-cheatsheet.md
+      - SQL*Plus Guide: databases/sqlplus.md
+      - PostgreSQL Administration: databases/postgresql.md
+      - JDBC Integrations: databases/jdbc-integrations.md
+  - Security & IAM:
+      - Overview: security/index.md
+      - DevSecOps: security/devsecops.md
+      - OAuth 2.0 & OIDC: security/oauth2-and-oidc.md
+      - Keycloak: security/keycloak.md
+      - TLS & Certificates: security/tls-and-certificates.md
+      - Secrets Management: security/secrets-management.md
+      - Hardening Checklists: security/hardening-checklists.md
+  - Storage & Ceph:
+      - Overview: storage/index.md
+      - Ceph Architecture: storage/ceph.md
+      - S3 & RadosGW: storage/s3-and-rgw.md
+      - Longhorn: storage/longhorn.md
+      - Storage Troubleshooting: storage/troubleshooting.md
+  - Operations & Reliability:
+      - Incident Response: operations/incident-response.md
+      - Troubleshooting Methodology: operations/troubleshooting-methodology.md
+      - Change Management: operations/change-management.md
+      - Production Readiness: operations/production-readiness.md
+      - Backup & Restore: operations/backup-and-restore.md
+      - Operational Checklists: operations/operational-checklists.md
+  - Runbooks:
+      - Runbook Directory: runbooks/index.md
+      - Kubernetes Incident: runbooks/kubernetes-incident.md
+      - Failed CI Pipeline: runbooks/failed-ci-pipeline.md
+      - Container Registry Issues: runbooks/container-registry-issues.md
+      - Certificate Expiration: runbooks/certificate-expiration.md
+      - Database Connectivity: runbooks/database-connectivity.md
+  - Templates & References:
+      - Glossary: glossary.md
+      - Conventions: conventions.md
+      - Troubleshooting Template: templates/troubleshooting-template.md
+      - Runbook Template: templates/runbook-template.md
+      - Tool Documentation Template: templates/tool-documentation-template.md
+      - Cheatsheet Template: templates/cheatsheet-template.md

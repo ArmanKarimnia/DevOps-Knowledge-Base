@@ -1,0 +1,124 @@
+# GitLab CI/CD Production Pipeline Template
+# Standards: Multi-stage, Kaniko container build, Sonatype Nexus push, Helm deployment, manual prod gate
+
+stages:
+  - lint-and-test
+  - security-scan
+  - build-and-publish
+  - deploy-staging
+  - deploy-production
+
+variables:
+  NEXUS_REGISTRY: "registry.example.com"
+  IMAGE_NAME: "${NEXUS_REGISTRY}/platform/${CI_PROJECT_NAME}"
+  IMAGE_TAG: "${CI_COMMIT_SHORT_SHA}"
+  HELM_RELEASE_NAME: "${CI_PROJECT_NAME}"
+  K8S_NAMESPACE: "workloads"
+
+default:
+  interruptible: true
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+
+# -----------------------------------------------------------------------------
+# Lint & Unit Test
+# -----------------------------------------------------------------------------
+lint:code:
+  stage: lint-and-test
+  image: node:20-alpine
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-deps"
+    paths:
+      - .npm/
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm run lint
+    - npm test -- --coverage
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+
+# -----------------------------------------------------------------------------
+# DevSecOps Container Vulnerability & Secret Scanning
+# -----------------------------------------------------------------------------
+security:trivy:
+  stage: security-scan
+  image:
+    name: aquasec/trivy:0.50.0
+    entrypoint: [""]
+  script:
+    - trivy fs --exit-code 0 --severity HIGH,CRITICAL --format table .
+    - trivy fs --exit-code 1 --severity CRITICAL --ignore-unfixed .
+  allow_failure: false
+
+# -----------------------------------------------------------------------------
+# Secure Rootless Image Build via Kaniko
+# -----------------------------------------------------------------------------
+build:image:
+  stage: build-and-publish
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"https://${NEXUS_REGISTRY}\":{\"username\":\"${CI_REGISTRY_USER}\",\"password\":\"${CI_REGISTRY_PASSWORD}\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor
+        --context "${CI_PROJECT_DIR}"
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+        --destination "${IMAGE_NAME}:${IMAGE_TAG}"
+        --destination "${IMAGE_NAME}:latest"
+        --cache=true
+        --cache-repo="${NEXUS_REGISTRY}/cache/${CI_PROJECT_NAME}"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+# -----------------------------------------------------------------------------
+# Automated Deployment to Staging
+# -----------------------------------------------------------------------------
+deploy:staging:
+  stage: deploy-staging
+  image: alpine/helm:3.15.0
+  environment:
+    name: staging
+    url: https://staging.example.com
+  script:
+    - helm upgrade --install "${HELM_RELEASE_NAME}" ./helm-chart
+        --namespace "${K8S_NAMESPACE}-staging"
+        --create-namespace
+        --values ./helm-chart/values-staging.yaml
+        --set image.repository="${IMAGE_NAME}"
+        --set image.tag="${IMAGE_TAG}"
+        --wait
+        --timeout 5m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+# -----------------------------------------------------------------------------
+# Gated Deployment to Production with Rollback Safety
+# -----------------------------------------------------------------------------
+deploy:production:
+  stage: deploy-production
+  image: alpine/helm:3.15.0
+  environment:
+    name: production
+    url: https://service.example.com
+  script:
+    - helm upgrade --install "${HELM_RELEASE_NAME}" ./helm-chart
+        --namespace "${K8S_NAMESPACE}"
+        --values ./helm-chart/values-production.yaml
+        --set image.repository="${IMAGE_NAME}"
+        --set image.tag="${IMAGE_TAG}"
+        --wait
+        --atomic
+        --timeout 8m
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
